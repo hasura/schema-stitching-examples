@@ -1,0 +1,24 @@
+{
+  "name": "multiple-remote-graphql-apis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "apollo-link": "^1.2.2",
+    "apollo-link-http": "^1.5.4",
+    "apollo-server": "2.0.0",
+    "graphql": "^0.13.2",
+    "graphql-tools": "^3.1.1",
+    "node-fetch": "^2.2.0"
+  },
+  "devDependencies": {
+    "esm": "^3.0.77",
+    "object-assign": "^4.1.1"
+  },
+  "scripts": {
+    "start": "node -r esm index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

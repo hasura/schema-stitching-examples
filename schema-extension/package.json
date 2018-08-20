@@ -1,0 +1,20 @@
+{
+  "name": "graphql-schema-stitching",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-link-http": "^1.5.4",
+    "apollo-server": "^2.0.0",
+    "express": "^4.16.3",
+    "graphql": "^0.13.2",
+    "graphql-tools": "^3.1.1",
+    "node-fetch": "^2.2.0"
+  }
+}

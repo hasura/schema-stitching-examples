@@ -1,0 +1,21 @@
+{
+  "name": "schema-transform",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "apollo-link-http": "^1.5.4",
+    "apollo-server": "^2.0.0",
+    "graphql-tools": "^3.1.1",
+    "node-fetch": "^2.2.0"
+  },
+  "devDependencies": {
+    "esm": "^3.0.77"
+  },
+  "scripts": {
+    "start": "node -r esm index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
