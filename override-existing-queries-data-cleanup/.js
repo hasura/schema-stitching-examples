@@ -56,10 +56,10 @@ const makeMergedSchema = async () => {
   const userSchema = await createRemoteExecutableSchema();
   const customResolver = makeCustomResolver(userSchema);
 
-  // merge the schema with new resolver
+  // merge the two schemas
   const mergedSchema = mergeSchemas({
     schemas: [userSchema],
-    resolvers: customResolver
+    resolvers: customResolver,
   });
 
   return mergedSchema;

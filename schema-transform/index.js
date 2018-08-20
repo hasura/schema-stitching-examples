@@ -12,23 +12,7 @@ import fetch from 'node-fetch';
 import { ApolloServer } from 'apollo-server';
 
 
-// Create custom user profile schema
-const createUserProfileSchema = async () => {
-  // Apollo link with the uri of GraphQL API
-  const link = new HttpLink({
-    uri: 'https://bazookaand.herokuapp.com/v1alpha1/graphql',
-    fetch
-  });
-  // introspect schema
-  const remoteSchema = await introspectSchema(link);
-  const remoteExecutableSchema = makeRemoteExecutableSchema({
-    schema: remoteSchema,
-    link
-  });
-  return remoteExecutableSchema;
-};
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '7c1f45a4445c13e7f8c84cdaba9c91eef51feccd';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 // Create github schema with renamed types
 const createRenamedGithubSchema = async () => {
@@ -55,15 +39,8 @@ const createRenamedGithubSchema = async () => {
 
 // Transform schema by renaming types and fields
 const createNewSchema = async () => {
-  const userProfileSchema = await createUserProfileSchema();
   const renamedGithubSchema = await createRenamedGithubSchema();
-  const newSchema = mergeSchemas({
-    schemas: [
-      userProfileSchema,
-      renamedGithubSchema
-    ]
-  });
-  return newSchema;
+  return renamedGithubSchema;
 };
 
 const runServer = async () => {
