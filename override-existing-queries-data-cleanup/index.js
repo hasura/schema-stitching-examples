@@ -72,9 +72,9 @@ makeMergedSchema().then(mergedSchema => {
   // Create a  new apollo server
   const server = new ApolloServer({ schema:mergedSchema });
 
-  server.listen({port: 3000})
+  server.listen()
     .then(({ url }) => {
-      console.log(`🚀  Server ready at ${url}`);
+      console.log(`Running at ${url}`);
     })
     .catch(err => console.log(err));
 
