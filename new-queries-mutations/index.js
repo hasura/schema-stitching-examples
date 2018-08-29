@@ -2,8 +2,20 @@ import { introspectSchema, makeExecutableSchema, makeRemoteExecutableSchema, mer
 import { HttpLink } from 'apollo-link-http';
 import fetch from 'node-fetch';
 import { ApolloServer } from 'apollo-server';
+import knex from 'knex';
+import pg from 'pg';
 
-const METAWEATHER_API_URL = "https://www.metaweather.com/api/location/";
+const PG_CONNECTION_STRING= process.env.PG_CONNECTION_STRING;
+
+// Create knex client for connecting to Postgres
+const createKnex = () => {
+  pg.defaults.ssl = true;
+  const knexClient = knex({
+    client: 'pg',
+    connection: PG_CONNECTION_STRING
+  });
+  return knexClient;
+};
 
 // Create executable schema from user GraphQL API
 const createUserSchema = async () => {
@@ -21,60 +33,29 @@ const createUserSchema = async () => {
   });
 };
 
-// Pass the city and get the unique woeid for the city
-const getWoeid = (place) => {
-  return fetch(`${METAWEATHER_API_URL}search/?query=${place}`)
-    .then(response => response.json())
-    .then(jsonResponse => jsonResponse[0])
-}
-
-// Use the woeid of the city to get its weather
-const getWeather = (data) => {
-  return fetch(METAWEATHER_API_URL + data.woeid)
-      .then(response => response.json())
-};
-
+// Type def for user_average_age schema
 const typeDefs = `
-    type CityWeather {
-      temp: String
-      min_temp: String
-      max_temp: String
-      city_name: String!
-      applicable_date: String!
-    }
-    type Query {
-      cityWeather(city_name: String! applicable_date: String): CityWeather
-    }
-  `;
+  type Query {
+    user_average_age: Float
+  }
+`;
 
-// Resolvers for cityWeather query
+// Resolvers for user_average_age query
 const resolvers = {
   Query: {
-    cityWeather: (root, args, context, info) => {
-      return getWoeid(args.city_name).then( function(response) {
-        if (!response) {
-          return null;
-        }
-        return getWeather(response).then( function(weather) {
-          if (!weather) {
-            return null;
-          }
-          let consolidated_weather = weather.consolidated_weather;
-          // check for args applicable_date to apply filter
-          consolidated_weather = args.applicable_date ? consolidated_weather.find(item => item.applicable_date === args.applicable_date) : consolidated_weather[0];
-          const respObj = {'temp': consolidated_weather.the_temp.toString(), 'min_temp': consolidated_weather.min_temp.toString(), 'max_temp': consolidated_weather.max_temp.toString(), 'city_name': weather.title, 'applicable_date': consolidated_weather.applicable_date};
-          return respObj;
-        });
-      });
-    }
-  },
+    user_average_age: async (root, args, context, info) => {
+      const response = await context.knex('user')
+        .avg('age');
+      return response[0].avg;
+    },
+  }
 };
 
 const createNewSchema = async () => {
   // Make and get executable user Schema
   const userExecutableSchema = await createUserSchema();
-  // Make executable weather schema
-  const weatherExecutableSchema = makeExecutableSchema({
+  // Make executable user_average_age schema
+  const averageAgeSchema = makeExecutableSchema({
     typeDefs,
     resolvers
   });
@@ -82,7 +63,7 @@ const createNewSchema = async () => {
   return mergeSchemas({
     schemas: [
       userExecutableSchema,
-      weatherExecutableSchema
+      averageAgeSchema
     ]
   });
 };
@@ -91,7 +72,12 @@ const runServer = async () => {
   // Get newly merged schema
   const schema = await createNewSchema();
   // start server with the new schema
-  const server = new ApolloServer({ schema });
+  const server = new ApolloServer({
+    schema,
+    context: {
+      knex: createKnex()
+    }
+  });
   server.listen().then(({url}) => {
     console.log(`Running at ${url}`);
   });
